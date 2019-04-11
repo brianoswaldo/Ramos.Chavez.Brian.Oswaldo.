@@ -1,0 +1,1577 @@
+***********************************************************************
+*
+*	CODE GENERATION LISTING FOR: Actividad.2.
+*	COMPILER VERSION: 5.10.0.9
+*
+***********************************************************************
+
+***********************************************************************
+UNUSED FUNCTIONS:
+
+	DEAD_BAND
+	SGN
+***********************************************************************
+
+***********************************************************************
+UNUSED FUNCTION BLOCKS:
+
+	CTUD_UDINT
+	CTUD_DINT
+	CTUD
+	CTU_UDINT
+	CTU_DINT
+	CTD_UDINT
+	CTD_DINT
+	CTD
+	R_TRIG
+	F_TRIG
+	SR
+	RS
+	TP
+	TON
+	TOF
+	FT_DERIV
+	FT_INT
+	FT_PID
+***********************************************************************
+
+**************************************************
+	List function block: CTU
+**************************************************
+
+FUNCTION_BLOCK CTU
+
+	{ DE:"<HTML>The CTU block <b>counts up</b> for each FALSE-to-TRUE transition of the input CU and sets the output Q when the accumulated value (CV) reaches the preset value (PV) value.<br/>
+<img src= ctuscheme.png>
+<ul>
+<li>rising edge of R reset CV to 0</li>
+<li>rising edge of CU increments CV by 1</li>
+<li>when CV reaches PV the output Q is set</li>
+<li>once CV is equal to PV its value remains until a rising edge of R</li>
+</ul>" }
+
+        VAR_INPUT
+CU : BOOL;	{ DE:"Count-up on input rising edge" }
+R : BOOL;	{ DE:"Reset counter input" }
+PV : INT;	{ DE:"Preset value" }
+	END_VAR
+
+        VAR_OUTPUT
+Q : BOOL;	{ DE:"Count-up output" }
+CV : INT;	{ DE:"Counter current value" }
+	END_VAR
+
+        VAR
+CUEDGE : BOOL;
+MEMCU : BOOL;
+	END_VAR
+
+END_FUNCTION_BLOCK
+
+054D00A0  55                            push ebp
+054D00A1  8B EB                         mov ebp, ebx
+
+#0		{SRC:CTU}
+#1		
+#2			(*	Check for reset input *)
+#3			LD		R
+(*) UNDEF
+054D00A3  33 C0                         xor eax, eax
+054D00A5  8A 45 03                      mov al, 3[ebp]
+
+#4			JMPCN	L0
+(-) BOOL
+054D00A8  84 C0                         test al, al
+054D00AA  90 74 11 90 90 90             je 054D00BEH
+
+#5			
+#6			LD		0
+(*) UNDEF
+054D00B0  B8 00 00 00 00                mov eax, 0
+
+#7			ST		CV
+(*) USINT
+054D00B5  66 89 45 07                   mov 7[ebp], ax
+
+#8			JMP		L1
+(-) INT
+054D00B9  EB 56 90 90 90                jmp 054D0111H
+
+#9		
+#10			(*	Check for increment enable *)
+#11		L0:
+#12			LD		CU
+(*) UNDEF
+054D00BE  33 C0                         xor eax, eax
+054D00C0  8A 45 02                      mov al, 2[ebp]
+
+#13			ANDN 	MEMCU
+(*) BOOL
+054D00C3  33 C9                         xor ecx, ecx
+054D00C5  8A 4D 01                      mov cl, 1[ebp]
+054D00C8  84 C9                         test cl, cl
+054D00CA  0F 94 C1                      sete cl
+054D00CD  23 C1                         and eax, ecx
+
+#14			ST 		CUEDGE
+(*) BOOL
+054D00CF  84 C0                         test al, al
+054D00D1  0F 95 45 00                   setne [ebp]
+
+#15			
+#16			LD 		CU
+(*) UNDEF
+054D00D5  33 C0                         xor eax, eax
+054D00D7  8A 45 02                      mov al, 2[ebp]
+
+#17			ST 		MEMCU
+(*) BOOL
+054D00DA  84 C0                         test al, al
+054D00DC  0F 95 45 01                   setne 1[ebp]
+
+#18			
+#19			LD 		CUEDGE
+(*) UNDEF
+054D00E0  33 C0                         xor eax, eax
+054D00E2  8A 45 00                      mov al, [ebp]
+
+#20			AND(	CV
+(*) BOOL
+054D00E5  50                            push eax
+054D00E6  0F BF 45 07                   movsx eax, word ptr 7[ebp]
+
+#21			LT		16#7FFF
+(*) INT
+054D00EA  3D FF 7F 00 00                cmp eax, 32767
+054D00EF  0F 9C C0                      setl al
+054D00F2  25 FF 00 00 00                and eax, 0FFh
+
+#22			)
+#23			JMPCN	L1
+(*) BOOL
+054D00F7  8B C8                         mov ecx, eax
+054D00F9  58                            pop eax
+054D00FA  23 C1                         and eax, ecx
+
+(-) BOOL
+054D00FC  84 C0                         test al, al
+054D00FE  90 74 10 90 90 90             je 054D0111H
+
+#24			
+#25			LD		CV
+(*) UNDEF
+054D0104  0F BF 45 07                   movsx eax, word ptr 7[ebp]
+
+#26			ADD		1
+(*) INT
+054D0108  05 01 00 00 00                add eax, 1
+
+#27			ST		CV
+(*) INT
+054D010D  66 89 45 07                   mov 7[ebp], ax
+
+#28			
+#29		L1:
+#30		
+#31			(*	Counter output	*)
+#32			LD		CV
+(*) UNDEF
+054D0111  0F BF 45 07                   movsx eax, word ptr 7[ebp]
+
+#33			GE		PV
+(*) INT
+054D0115  0F BF 4D 04                   movsx ecx, word ptr 4[ebp]
+054D0119  3B C1                         cmp eax, ecx
+054D011B  0F 9D C0                      setge al
+054D011E  25 FF 00 00 00                and eax, 0FFh
+
+#34			ST		Q
+(*) BOOL
+054D0123  84 C0                         test al, al
+054D0125  0F 95 45 06                   setne 6[ebp]
+
+054D0129  5D                            pop ebp
+
+054D012A  C3                            ret
+
+
+Frame allocation:
+
+	0000 bit  0: VAR CUEDGE
+	0001 bit  0: VAR MEMCU
+	0002 bit  0: VAR CU
+	0003 bit  0: VAR R
+	0004       : VAR PV
+	0006 bit  0: VAR Q
+	0007       : VAR CV
+
+END_FUNCTION_BLOCK
+**************************************************
+	List program: MAIN
+**************************************************
+
+PROGRAM MAIN
+
+END_PROGRAM
+
+054D0130  55                            push ebp
+054D0131  8B EC                         mov ebp, esp
+054D0133  60                            pushad
+
+#0		{SRC:MAIN}
+#1		(*$WAITSWITCH$*)
+#2		
+#3			(* CNT := CNT + 1; *)
+#4			LD		CNT	{LNXT:2|2|-1}
+(*) UNDEF
+054D0134  0F BF 05 CC CC CC CC          movsx eax, word ptr [CCCCCCCCH] ; $$DATA$$+12
+
+#5			ADD		1	{LNXT:2|2|-1}
+(*) INT
+054D013B  05 01 00 00 00                add eax, 1
+
+#6			ST		CNT	{LNXT:2|2|-1}
+(*) INT
+054D0140  66 89 05 CC CC CC CC          mov [CCCCCCCCH], ax ; $$DATA$$+12
+
+END_PROGRAM
+**************************************************
+	List program: ACTIVIDAD2
+**************************************************
+
+PROGRAM ACTIVIDAD2
+
+        VAR
+S0 AT %IX0.0 : BOOL;
+S1 AT %IX0.1 : BOOL;
+S2 AT %IX0.2 : BOOL;
+S3 AT %IX0.3 : BOOL;
+S4 AT %IX0.4 : BOOL;
+S5 AT %IX0.5 : BOOL;
+S6 AT %IX0.6 : BOOL;
+S7 AT %IX0.7 : BOOL;
+S10 AT %IX0.10 : BOOL;
+S11 AT %IX0.11 : BOOL;
+S12 AT %IX0.12 : BOOL;
+Q0 AT %QX0.0 : BOOL;
+Q1 AT %QX0.1 : BOOL;
+Q2 AT %QX0.2 : BOOL;
+Q3 AT %QX0.3 : BOOL;
+Q4 AT %QX0.4 : BOOL;
+Q5 AT %QX0.5 : BOOL;
+Q6 AT %QX0.6 : BOOL;
+Q7 AT %QX0.7 : BOOL;
+Q10 AT %QX0.10 : BOOL;
+Q11 AT %QX0.11 : BOOL;
+Q12 AT %QX0.12 : BOOL;
+ME0 : BOOL;
+ME1 : BOOL;
+ME2 : BOOL;
+ME3 : BOOL;
+ME4 : BOOL;
+ME5 : BOOL;
+ME6 : BOOL;
+ME7 : BOOL;
+ME8 : BOOL;
+ME9 : BOOL;
+ME10 : BOOL;
+ME11 : BOOL;
+ME12 : BOOL;
+ME13 : BOOL;
+ME14 : BOOL;
+ME15 : BOOL;
+ME16 : BOOL;
+ME17 : BOOL;
+ME18 : BOOL;
+ME19 : BOOL;
+ME20 : BOOL;
+ME21 : BOOL;
+ME22 : BOOL;
+ME23 : BOOL;
+ME24 : BOOL;
+ME25 : BOOL;
+M0 : BOOL;
+M1 : BOOL;
+M2 : BOOL;
+M3 : BOOL;
+M4 : BOOL;
+M5 : BOOL;
+M6 : BOOL;
+M7 : BOOL;
+M8 : BOOL;
+M9 : BOOL;
+M10 : BOOL;
+M11 : BOOL;
+M12 : BOOL;
+M13 : BOOL;
+M14 : BOOL;
+M15 : BOOL;
+M16 : BOOL;
+M17 : BOOL;
+M18 : BOOL;
+M19 : BOOL;
+M20 : BOOL;
+NOO_SE : CTD;
+NO_SE : CTU;
+NI : CTUD;
+NO : CTU;
+CTU : CTD_UDINT;
+HH : CTU;
+	END_VAR
+
+END_PROGRAM
+
+#0			{SRC:ACTIVIDAD2}
+#1		 
+#2		  
+#3			(* Network 1 *)
+#4			LD		S12 {R:1$6}
+(*) UNDEF
+054D0147  33 C0                         xor eax, eax
+054D0149  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+12
+
+#5			AND		ME0 {R:1$8}
+(*) BOOL
+054D014F  33 C9                         xor ecx, ecx
+054D0151  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+14
+054D0157  23 C1                         and eax, ecx
+
+#6			ANDN		M2 {R:1$10}
+(*) BOOL
+054D0159  33 C9                         xor ecx, ecx
+054D015B  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+15
+054D0161  84 C9                         test cl, cl
+054D0163  0F 94 C1                      sete cl
+054D0166  23 C1                         and eax, ecx
+
+#7			OR		S0 {R:1$12}
+(*) BOOL
+054D0168  33 C9                         xor ecx, ecx
+054D016A  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; %I0+0
+054D0170  0B C1                         or eax, ecx
+
+#8			ST		M0 {R:1$5}
+(*) BOOL
+054D0172  84 C0                         test al, al
+054D0174  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+16
+
+#9		 
+#10			(* Network 2 *)
+#11			LD		S0 {R:2$3}
+(*) UNDEF
+054D017B  33 C0                         xor eax, eax
+054D017D  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+0
+
+#12			AND		ME1 {R:2$7}
+(*) BOOL
+054D0183  33 C9                         xor ecx, ecx
+054D0185  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+17
+054D018B  23 C1                         and eax, ecx
+
+#13			ST		M1 {R:2$2}
+(*) BOOL
+054D018D  84 C0                         test al, al
+054D018F  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+18
+
+#14		 
+#15			(* Network 3 *)
+#16			LD		S0 {R:3$4}
+(*) UNDEF
+054D0196  33 C0                         xor eax, eax
+054D0198  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+0
+
+#17			AND		ME0 {R:3$5}
+(*) BOOL
+054D019E  33 C9                         xor ecx, ecx
+054D01A0  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+14
+054D01A6  23 C1                         and eax, ecx
+
+#18			ANDN		M0 {R:3$7}
+(*) BOOL
+054D01A8  33 C9                         xor ecx, ecx
+054D01AA  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+16
+054D01B0  84 C9                         test cl, cl
+054D01B2  0F 94 C1                      sete cl
+054D01B5  23 C1                         and eax, ecx
+
+#19			ST		M2 {R:3$9}
+(*) BOOL
+054D01B7  84 C0                         test al, al
+054D01B9  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+15
+
+#20		 
+#21			(* Network 4 *)
+#22			LD		S12 {R:4$2}
+(*) UNDEF
+054D01C0  33 C0                         xor eax, eax
+054D01C2  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+12
+
+#23			AND		ME3 {R:4$4}
+(*) BOOL
+054D01C8  33 C9                         xor ecx, ecx
+054D01CA  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+19
+054D01D0  23 C1                         and eax, ecx
+
+#24			ST		M3 {R:4$6}
+(*) BOOL
+054D01D2  84 C0                         test al, al
+054D01D4  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+20
+
+#25		 
+#26			(* Network 5 *)
+#27			LD		ME2 {R:5$2}
+(*) UNDEF
+054D01DB  33 C0                         xor eax, eax
+054D01DD  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+21
+
+#28			OR		ME4 {R:5$8}
+(*) BOOL
+054D01E3  33 C9                         xor ecx, ecx
+054D01E5  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+22
+054D01EB  0B C1                         or eax, ecx
+
+#29			AND		S10 {R:5$4}
+(*) BOOL
+054D01ED  33 C9                         xor ecx, ecx
+054D01EF  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; %I0+10
+054D01F5  23 C1                         and eax, ecx
+
+#30			ST		M4 {R:5$10}
+(*) BOOL
+054D01F7  84 C0                         test al, al
+054D01F9  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+23
+
+#31		 
+#32			(* Network 6 *)
+#33			LD		S11 {R:6$2}
+(*) UNDEF
+054D0200  33 C0                         xor eax, eax
+054D0202  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+11
+
+#34			AND		ME5 {R:6$4}
+(*) BOOL
+054D0208  33 C9                         xor ecx, ecx
+054D020A  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+24
+054D0210  23 C1                         and eax, ecx
+
+#35			ST		M5 {R:6$6}
+(*) BOOL
+054D0212  84 C0                         test al, al
+054D0214  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+25
+
+#36		 
+#37			(* Network 7 *)
+#38			LD		S10 {R:7$2}
+(*) UNDEF
+054D021B  33 C0                         xor eax, eax
+054D021D  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+10
+
+#39			AND		ME6 {R:7$4}
+(*) BOOL
+054D0223  33 C9                         xor ecx, ecx
+054D0225  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+26
+054D022B  23 C1                         and eax, ecx
+
+#40			ST		M6 {R:7$6}
+(*) BOOL
+054D022D  84 C0                         test al, al
+054D022F  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+27
+
+#41		 
+#42			(* Network 8 *)
+#43			LD		S0 {R:8$2}
+(*) UNDEF
+054D0236  33 C0                         xor eax, eax
+054D0238  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+0
+
+#44			AND		ME10 {R:8$4}
+(*) BOOL
+054D023E  33 C9                         xor ecx, ecx
+054D0240  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+28
+054D0246  23 C1                         and eax, ecx
+
+#45			ST		M10 {R:8$6}
+(*) BOOL
+054D0248  84 C0                         test al, al
+054D024A  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+29
+
+#46		 
+#47			(* Network 9 *)
+#48			LD		S3 {R:9$2}
+(*) UNDEF
+054D0251  33 C0                         xor eax, eax
+054D0253  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+3
+
+#49			AND		ME11 {R:9$4}
+(*) BOOL
+054D0259  33 C9                         xor ecx, ecx
+054D025B  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+30
+054D0261  23 C1                         and eax, ecx
+
+#50			ST		M11 {R:9$6}
+(*) BOOL
+054D0263  84 C0                         test al, al
+054D0265  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+31
+
+#51		 
+#52			(* Network 10 *)
+#53			LD		S5 {R:10$2}
+(*) UNDEF
+054D026C  33 C0                         xor eax, eax
+054D026E  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+5
+
+#54			AND		ME12 {R:10$4}
+(*) BOOL
+054D0274  33 C9                         xor ecx, ecx
+054D0276  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+32
+054D027C  23 C1                         and eax, ecx
+
+#55			ST		M12 {R:10$6}
+(*) BOOL
+054D027E  84 C0                         test al, al
+054D0280  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+33
+
+#56		 
+#57			(* Network 11 *)
+#58			LD		S2 {R:11$2}
+(*) UNDEF
+054D0287  33 C0                         xor eax, eax
+054D0289  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+2
+
+#59			AND		S4 {R:11$4}
+(*) BOOL
+054D028F  33 C9                         xor ecx, ecx
+054D0291  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; %I0+4
+054D0297  23 C1                         and eax, ecx
+
+#60			AND		ME13 {R:11$6}
+(*) BOOL
+054D0299  33 C9                         xor ecx, ecx
+054D029B  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+34
+054D02A1  23 C1                         and eax, ecx
+
+#61			ST		M13 {R:11$7}
+(*) BOOL
+054D02A3  84 C0                         test al, al
+054D02A5  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+35
+
+#62		 
+#63			(* Network 12 *)
+#64			LD		S7 {R:12$2}
+(*) UNDEF
+054D02AC  33 C0                         xor eax, eax
+054D02AE  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+7
+
+#65			AND		ME14 {R:12$4}
+(*) BOOL
+054D02B4  33 C9                         xor ecx, ecx
+054D02B6  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+36
+054D02BC  23 C1                         and eax, ecx
+
+#66			ST		M14 {R:12$6}
+(*) BOOL
+054D02BE  84 C0                         test al, al
+054D02C0  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+37
+
+#67		 
+#68			(* Network 13 *)
+#69			LD		S3 {R:13$2}
+(*) UNDEF
+054D02C7  33 C0                         xor eax, eax
+054D02C9  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+3
+
+#70			AND		ME15 {R:13$4}
+(*) BOOL
+054D02CF  33 C9                         xor ecx, ecx
+054D02D1  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+38
+054D02D7  23 C1                         and eax, ecx
+
+#71			ST		M15 {R:13$6}
+(*) BOOL
+054D02D9  84 C0                         test al, al
+054D02DB  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+39
+
+#72		 
+#73			(* Network 14 *)
+#74			LD		ME16 {R:14$2}
+(*) UNDEF
+054D02E2  33 C0                         xor eax, eax
+054D02E4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+40
+
+#75			AND		Q5 {R:14$4}
+(*) BOOL
+054D02EA  33 C9                         xor ecx, ecx
+054D02EC  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; %Q0+5
+054D02F2  23 C1                         and eax, ecx
+
+#76			ST		M16 {R:14$6}
+(*) BOOL
+054D02F4  84 C0                         test al, al
+054D02F6  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+41
+
+#77		 
+#78			(* Network 15 *)
+#79			LD		S2 {R:15$2}
+(*) UNDEF
+054D02FD  33 C0                         xor eax, eax
+054D02FF  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+2
+
+#80			AND		S4 {R:15$4}
+(*) BOOL
+054D0305  33 C9                         xor ecx, ecx
+054D0307  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; %I0+4
+054D030D  23 C1                         and eax, ecx
+
+#81			AND		ME17 {R:15$6}
+(*) BOOL
+054D030F  33 C9                         xor ecx, ecx
+054D0311  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+42
+054D0317  23 C1                         and eax, ecx
+
+#82			ST		M17 {R:15$7}
+(*) BOOL
+054D0319  84 C0                         test al, al
+054D031B  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+43
+
+#83		 
+#84			(* Network 16 *)
+#85			LD		ME18 {R:16$2}
+(*) UNDEF
+054D0322  33 C0                         xor eax, eax
+054D0324  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+44
+
+#86			AND		S10 {R:16$4}
+(*) BOOL
+054D032A  33 C9                         xor ecx, ecx
+054D032C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; %I0+10
+054D0332  23 C1                         and eax, ecx
+
+#87			OR		M0 {R:16$23}
+(*) BOOL
+054D0334  33 C9                         xor ecx, ecx
+054D0336  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+16
+054D033C  0B C1                         or eax, ecx
+
+#88			ST		HH.CU {R:16$25}
+(*) BOOL
+054D033E  84 C0                         test al, al
+054D0340  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+47
+
+#89			CAL		HH {R:16$25}
+(*) BOOL
+054D0347  50                            push eax
+054D0348  BB CC CC CC CC                mov ebx, CCCCCCCCH ; $$DATA$$+45
+054D034D  E8 4E FD FF FF                call 054D00A0H
+054D0352  58                            pop eax
+
+#90			LD		HH.Q {R:16$25}
+(*) UNDEF
+054D0353  33 C0                         xor eax, eax
+054D0355  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+51
+
+#91			ST		M18 {R:16$6}
+(*) BOOL
+054D035B  84 C0                         test al, al
+054D035D  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+54
+
+#92		 
+#93			(* Network 17 *)
+#94			LD		S12 {R:17$0}
+(*) UNDEF
+054D0364  33 C0                         xor eax, eax
+054D0366  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; %I0+12
+
+#95			AND		ME19 {R:17$2}
+(*) BOOL
+054D036C  33 C9                         xor ecx, ecx
+054D036E  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+55
+054D0374  23 C1                         and eax, ecx
+
+#96			ST		M19 {R:17$1}
+(*) BOOL
+054D0376  84 C0                         test al, al
+054D0378  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+56
+
+#97		 
+#98			(* Network 18 *)
+#99			LD		TRUE
+(*) UNDEF
+054D037F  B8 01 00 00 00                mov eax, 1
+
+#100			ST		M20 {R:18$1}
+(*) BOOL
+054D0384  84 C0                         test al, al
+054D0386  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+57
+
+#101		 
+#102			(* Network 19 *)
+#103			LDN		ME1 {R:19$0}
+(*) UNDEF
+054D038D  33 C0                         xor eax, eax
+054D038F  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+17
+054D0395  84 C0                         test al, al
+054D0397  0F 94 C0                      sete al
+
+#104			ANDN		ME2 {R:19$2}
+(*) BOOL
+054D039A  33 C9                         xor ecx, ecx
+054D039C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+21
+054D03A2  84 C9                         test cl, cl
+054D03A4  0F 94 C1                      sete cl
+054D03A7  23 C1                         and eax, ecx
+
+#105			ANDN		ME3 {R:19$4}
+(*) BOOL
+054D03A9  33 C9                         xor ecx, ecx
+054D03AB  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+19
+054D03B1  84 C9                         test cl, cl
+054D03B3  0F 94 C1                      sete cl
+054D03B6  23 C1                         and eax, ecx
+
+#106			ANDN		ME4 {R:19$5}
+(*) BOOL
+054D03B8  33 C9                         xor ecx, ecx
+054D03BA  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+22
+054D03C0  84 C9                         test cl, cl
+054D03C2  0F 94 C1                      sete cl
+054D03C5  23 C1                         and eax, ecx
+
+#107			ANDN		ME5 {R:19$6}
+(*) BOOL
+054D03C7  33 C9                         xor ecx, ecx
+054D03C9  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+24
+054D03CF  84 C9                         test cl, cl
+054D03D1  0F 94 C1                      sete cl
+054D03D4  23 C1                         and eax, ecx
+
+#108			ANDN		ME6 {R:19$7}
+(*) BOOL
+054D03D6  33 C9                         xor ecx, ecx
+054D03D8  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+26
+054D03DE  84 C9                         test cl, cl
+054D03E0  0F 94 C1                      sete cl
+054D03E3  23 C1                         and eax, ecx
+
+#109			ANDN		ME10 {R:19$8}
+(*) BOOL
+054D03E5  33 C9                         xor ecx, ecx
+054D03E7  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+28
+054D03ED  84 C9                         test cl, cl
+054D03EF  0F 94 C1                      sete cl
+054D03F2  23 C1                         and eax, ecx
+
+#110			ANDN		ME11 {R:19$9}
+(*) BOOL
+054D03F4  33 C9                         xor ecx, ecx
+054D03F6  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+30
+054D03FC  84 C9                         test cl, cl
+054D03FE  0F 94 C1                      sete cl
+054D0401  23 C1                         and eax, ecx
+
+#111			ANDN		ME12 {R:19$10}
+(*) BOOL
+054D0403  33 C9                         xor ecx, ecx
+054D0405  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+32
+054D040B  84 C9                         test cl, cl
+054D040D  0F 94 C1                      sete cl
+054D0410  23 C1                         and eax, ecx
+
+#112			ANDN		ME13 {R:19$11}
+(*) BOOL
+054D0412  33 C9                         xor ecx, ecx
+054D0414  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+34
+054D041A  84 C9                         test cl, cl
+054D041C  0F 94 C1                      sete cl
+054D041F  23 C1                         and eax, ecx
+
+#113			ANDN		ME14 {R:19$12}
+(*) BOOL
+054D0421  33 C9                         xor ecx, ecx
+054D0423  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+36
+054D0429  84 C9                         test cl, cl
+054D042B  0F 94 C1                      sete cl
+054D042E  23 C1                         and eax, ecx
+
+#114			ANDN		ME15 {R:19$13}
+(*) BOOL
+054D0430  33 C9                         xor ecx, ecx
+054D0432  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+38
+054D0438  84 C9                         test cl, cl
+054D043A  0F 94 C1                      sete cl
+054D043D  23 C1                         and eax, ecx
+
+#115			ANDN		ME16 {R:19$14}
+(*) BOOL
+054D043F  33 C9                         xor ecx, ecx
+054D0441  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+40
+054D0447  84 C9                         test cl, cl
+054D0449  0F 94 C1                      sete cl
+054D044C  23 C1                         and eax, ecx
+
+#116			ANDN		ME17 {R:19$15}
+(*) BOOL
+054D044E  33 C9                         xor ecx, ecx
+054D0450  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+42
+054D0456  84 C9                         test cl, cl
+054D0458  0F 94 C1                      sete cl
+054D045B  23 C1                         and eax, ecx
+
+#117			ANDN		ME18 {R:19$16}
+(*) BOOL
+054D045D  33 C9                         xor ecx, ecx
+054D045F  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+44
+054D0465  84 C9                         test cl, cl
+054D0467  0F 94 C1                      sete cl
+054D046A  23 C1                         and eax, ecx
+
+#118			ANDN		ME19 {R:19$17}
+(*) BOOL
+054D046C  33 C9                         xor ecx, ecx
+054D046E  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+55
+054D0474  84 C9                         test cl, cl
+054D0476  0F 94 C1                      sete cl
+054D0479  23 C1                         and eax, ecx
+
+#119			OR(		ME19 {R:19$19}
+(*) BOOL
+054D047B  50                            push eax
+054D047C  33 C0                         xor eax, eax
+054D047E  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+55
+
+#120			AND		ME20 {R:19$21}
+(*) BOOL
+054D0484  33 C9                         xor ecx, ecx
+054D0486  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+58
+054D048C  23 C1                         and eax, ecx
+
+#121			)
+#122			S		ME0 {R:19$1}
+(*) BOOL
+054D048E  8B C8                         mov ecx, eax
+054D0490  58                            pop eax
+054D0491  0B C1                         or eax, ecx
+
+(*) BOOL
+054D0493  84 C0                         test al, al
+054D0495  90 74 0A 90 90 90             je 054D04A2H
+054D049B  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+14
+
+#123		 
+#124			(* Network 20 *)
+#125			LD		ME0 {R:20$0}
+(*) UNDEF
+054D04A2  33 C0                         xor eax, eax
+054D04A4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+14
+
+#126			AND		M0 {R:20$2}
+(*) BOOL
+054D04AA  33 C9                         xor ecx, ecx
+054D04AC  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+16
+054D04B2  23 C1                         and eax, ecx
+
+#127			S		ME1 {R:20$1}
+(*) BOOL
+054D04B4  84 C0                         test al, al
+054D04B6  90 74 0A 90 90 90             je 054D04C3H
+054D04BC  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+17
+
+#128			R		ME0 {R:20$7}
+(*) BOOL
+054D04C3  84 C0                         test al, al
+054D04C5  90 74 0A 90 90 90             je 054D04D2H
+054D04CB  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+14
+
+#129		 
+#130			(* Network 21 *)
+#131			LD		ME1 {R:21$0}
+(*) UNDEF
+054D04D2  33 C0                         xor eax, eax
+054D04D4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+17
+
+#132			AND		M1 {R:21$3}
+(*) BOOL
+054D04DA  33 C9                         xor ecx, ecx
+054D04DC  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+18
+054D04E2  23 C1                         and eax, ecx
+
+#133			S		ME2 {R:21$1}
+(*) BOOL
+054D04E4  84 C0                         test al, al
+054D04E6  90 74 0A 90 90 90             je 054D04F3H
+054D04EC  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+21
+
+#134			R		ME1 {R:21$2}
+(*) BOOL
+054D04F3  84 C0                         test al, al
+054D04F5  90 74 0A 90 90 90             je 054D0502H
+054D04FB  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+17
+
+#135		 
+#136			(* Network 22 *)
+#137			LD		ME0 {R:22$0}
+(*) UNDEF
+054D0502  33 C0                         xor eax, eax
+054D0504  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+14
+
+#138			AND		M2 {R:22$2}
+(*) BOOL
+054D050A  33 C9                         xor ecx, ecx
+054D050C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+15
+054D0512  23 C1                         and eax, ecx
+
+#139			S		ME3 {R:22$1}
+(*) BOOL
+054D0514  84 C0                         test al, al
+054D0516  90 74 0A 90 90 90             je 054D0523H
+054D051C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+19
+
+#140			R		ME2 {R:22$4}
+(*) BOOL
+054D0523  84 C0                         test al, al
+054D0525  90 74 0A 90 90 90             je 054D0532H
+054D052B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+21
+
+#141		 
+#142			(* Network 23 *)
+#143			LD		ME3 {R:23$0}
+(*) UNDEF
+054D0532  33 C0                         xor eax, eax
+054D0534  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+19
+
+#144			AND		M3 {R:23$3}
+(*) BOOL
+054D053A  33 C9                         xor ecx, ecx
+054D053C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+20
+054D0542  23 C1                         and eax, ecx
+
+#145			S		ME4 {R:23$1}
+(*) BOOL
+054D0544  84 C0                         test al, al
+054D0546  90 74 0A 90 90 90             je 054D0553H
+054D054C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+22
+
+#146			R		ME3 {R:23$2}
+(*) BOOL
+054D0553  84 C0                         test al, al
+054D0555  90 74 0A 90 90 90             je 054D0562H
+054D055B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+19
+
+#147		 
+#148			(* Network 24 *)
+#149			LD		ME2 {R:24$0}
+(*) UNDEF
+054D0562  33 C0                         xor eax, eax
+054D0564  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+21
+
+#150			AND		M4 {R:24$3}
+(*) BOOL
+054D056A  33 C9                         xor ecx, ecx
+054D056C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+23
+054D0572  23 C1                         and eax, ecx
+
+#151			OR(		ME4 {R:24$6}
+(*) BOOL
+054D0574  50                            push eax
+054D0575  33 C0                         xor eax, eax
+054D0577  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+22
+
+#152			AND		M4 {R:24$8}
+(*) BOOL
+054D057D  33 C9                         xor ecx, ecx
+054D057F  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+23
+054D0585  23 C1                         and eax, ecx
+
+#153			)
+#154			S		ME5 {R:24$1}
+(*) BOOL
+054D0587  8B C8                         mov ecx, eax
+054D0589  58                            pop eax
+054D058A  0B C1                         or eax, ecx
+
+(*) BOOL
+054D058C  84 C0                         test al, al
+054D058E  90 74 0A 90 90 90             je 054D059BH
+054D0594  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+24
+
+#155			R		ME4 {R:24$2}
+(*) BOOL
+054D059B  84 C0                         test al, al
+054D059D  90 74 0A 90 90 90             je 054D05AAH
+054D05A3  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+22
+
+#156		 
+#157			(* Network 25 *)
+#158			LD		ME5 {R:25$0}
+(*) UNDEF
+054D05AA  33 C0                         xor eax, eax
+054D05AC  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+24
+
+#159			AND		M5 {R:25$3}
+(*) BOOL
+054D05B2  33 C9                         xor ecx, ecx
+054D05B4  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+25
+054D05BA  23 C1                         and eax, ecx
+
+#160			S		ME6 {R:25$1}
+(*) BOOL
+054D05BC  84 C0                         test al, al
+054D05BE  90 74 0A 90 90 90             je 054D05CBH
+054D05C4  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+26
+
+#161			R		ME5 {R:25$2}
+(*) BOOL
+054D05CB  84 C0                         test al, al
+054D05CD  90 74 0A 90 90 90             je 054D05DAH
+054D05D3  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+24
+
+#162		 
+#163			(* Network 26 *)
+#164			LD		ME6 {R:26$0}
+(*) UNDEF
+054D05DA  33 C0                         xor eax, eax
+054D05DC  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+26
+
+#165			AND		M6 {R:26$3}
+(*) BOOL
+054D05E2  33 C9                         xor ecx, ecx
+054D05E4  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+27
+054D05EA  23 C1                         and eax, ecx
+
+#166			OR(		ME18 {R:26$6}
+(*) BOOL
+054D05EC  50                            push eax
+054D05ED  33 C0                         xor eax, eax
+054D05EF  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+44
+
+#167			AND		M18 {R:26$8}
+(*) BOOL
+054D05F5  33 C9                         xor ecx, ecx
+054D05F7  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+54
+054D05FD  23 C1                         and eax, ecx
+
+#168			)
+#169			S		ME10 {R:26$1}
+(*) BOOL
+054D05FF  8B C8                         mov ecx, eax
+054D0601  58                            pop eax
+054D0602  0B C1                         or eax, ecx
+
+(*) BOOL
+054D0604  84 C0                         test al, al
+054D0606  90 74 0A 90 90 90             je 054D0613H
+054D060C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+28
+
+#170			R		ME6 {R:26$2}
+(*) BOOL
+054D0613  84 C0                         test al, al
+054D0615  90 74 0A 90 90 90             je 054D0622H
+054D061B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+26
+
+#171		 
+#172			(* Network 27 *)
+#173			LD		ME10 {R:27$0}
+(*) UNDEF
+054D0622  33 C0                         xor eax, eax
+054D0624  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+28
+
+#174			AND		M10 {R:27$2}
+(*) BOOL
+054D062A  33 C9                         xor ecx, ecx
+054D062C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+29
+054D0632  23 C1                         and eax, ecx
+
+#175			S		ME11 {R:27$1}
+(*) BOOL
+054D0634  84 C0                         test al, al
+054D0636  90 74 0A 90 90 90             je 054D0643H
+054D063C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+30
+
+#176			R		ME10 {R:27$4}
+(*) BOOL
+054D0643  84 C0                         test al, al
+054D0645  90 74 0A 90 90 90             je 054D0652H
+054D064B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+28
+
+#177		 
+#178			(* Network 28 *)
+#179			LD		ME11 {R:28$0}
+(*) UNDEF
+054D0652  33 C0                         xor eax, eax
+054D0654  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+30
+
+#180			AND		M11 {R:28$3}
+(*) BOOL
+054D065A  33 C9                         xor ecx, ecx
+054D065C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+31
+054D0662  23 C1                         and eax, ecx
+
+#181			S		ME12 {R:28$1}
+(*) BOOL
+054D0664  84 C0                         test al, al
+054D0666  90 74 0A 90 90 90             je 054D0673H
+054D066C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+32
+
+#182			R		ME11 {R:28$2}
+(*) BOOL
+054D0673  84 C0                         test al, al
+054D0675  90 74 0A 90 90 90             je 054D0682H
+054D067B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+30
+
+#183		 
+#184			(* Network 29 *)
+#185			LD		ME12 {R:29$0}
+(*) UNDEF
+054D0682  33 C0                         xor eax, eax
+054D0684  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+32
+
+#186			AND		M12 {R:29$3}
+(*) BOOL
+054D068A  33 C9                         xor ecx, ecx
+054D068C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+33
+054D0692  23 C1                         and eax, ecx
+
+#187			S		ME13 {R:29$1}
+(*) BOOL
+054D0694  84 C0                         test al, al
+054D0696  90 74 0A 90 90 90             je 054D06A3H
+054D069C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+34
+
+#188			R		ME12 {R:29$2}
+(*) BOOL
+054D06A3  84 C0                         test al, al
+054D06A5  90 74 0A 90 90 90             je 054D06B2H
+054D06AB  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+32
+
+#189		 
+#190			(* Network 30 *)
+#191			LD		ME13 {R:30$0}
+(*) UNDEF
+054D06B2  33 C0                         xor eax, eax
+054D06B4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+34
+
+#192			AND		M13 {R:30$3}
+(*) BOOL
+054D06BA  33 C9                         xor ecx, ecx
+054D06BC  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+35
+054D06C2  23 C1                         and eax, ecx
+
+#193			S		ME14 {R:30$1}
+(*) BOOL
+054D06C4  84 C0                         test al, al
+054D06C6  90 74 0A 90 90 90             je 054D06D3H
+054D06CC  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+36
+
+#194			R		ME13 {R:30$2}
+(*) BOOL
+054D06D3  84 C0                         test al, al
+054D06D5  90 74 0A 90 90 90             je 054D06E2H
+054D06DB  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+34
+
+#195		 
+#196			(* Network 31 *)
+#197			LD		ME14 {R:31$0}
+(*) UNDEF
+054D06E2  33 C0                         xor eax, eax
+054D06E4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+36
+
+#198			AND		M14 {R:31$3}
+(*) BOOL
+054D06EA  33 C9                         xor ecx, ecx
+054D06EC  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+37
+054D06F2  23 C1                         and eax, ecx
+
+#199			S		ME15 {R:31$1}
+(*) BOOL
+054D06F4  84 C0                         test al, al
+054D06F6  90 74 0A 90 90 90             je 054D0703H
+054D06FC  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+38
+
+#200			R		ME14 {R:31$2}
+(*) BOOL
+054D0703  84 C0                         test al, al
+054D0705  90 74 0A 90 90 90             je 054D0712H
+054D070B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+36
+
+#201		 
+#202			(* Network 32 *)
+#203			LD		ME15 {R:32$0}
+(*) UNDEF
+054D0712  33 C0                         xor eax, eax
+054D0714  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+38
+
+#204			AND		M15 {R:32$3}
+(*) BOOL
+054D071A  33 C9                         xor ecx, ecx
+054D071C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+39
+054D0722  23 C1                         and eax, ecx
+
+#205			S		ME16 {R:32$1}
+(*) BOOL
+054D0724  84 C0                         test al, al
+054D0726  90 74 0A 90 90 90             je 054D0733H
+054D072C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+40
+
+#206			R		ME15 {R:32$2}
+(*) BOOL
+054D0733  84 C0                         test al, al
+054D0735  90 74 0A 90 90 90             je 054D0742H
+054D073B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+38
+
+#207		 
+#208			(* Network 33 *)
+#209			LD		ME16 {R:33$0}
+(*) UNDEF
+054D0742  33 C0                         xor eax, eax
+054D0744  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+40
+
+#210			AND		M16 {R:33$2}
+(*) BOOL
+054D074A  33 C9                         xor ecx, ecx
+054D074C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+41
+054D0752  23 C1                         and eax, ecx
+
+#211			S		ME17 {R:33$1}
+(*) BOOL
+054D0754  84 C0                         test al, al
+054D0756  90 74 0A 90 90 90             je 054D0763H
+054D075C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+42
+
+#212			R		ME16 {R:33$4}
+(*) BOOL
+054D0763  84 C0                         test al, al
+054D0765  90 74 0A 90 90 90             je 054D0772H
+054D076B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+40
+
+#213		 
+#214			(* Network 34 *)
+#215			LD		ME17 {R:34$0}
+(*) UNDEF
+054D0772  33 C0                         xor eax, eax
+054D0774  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+42
+
+#216			AND		M17 {R:34$3}
+(*) BOOL
+054D077A  33 C9                         xor ecx, ecx
+054D077C  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+43
+054D0782  23 C1                         and eax, ecx
+
+#217			S		M18 {R:34$1}
+(*) BOOL
+054D0784  84 C0                         test al, al
+054D0786  90 74 0A 90 90 90             je 054D0793H
+054D078C  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+54
+
+#218			R		M17 {R:34$2}
+(*) BOOL
+054D0793  84 C0                         test al, al
+054D0795  90 74 0A 90 90 90             je 054D07A2H
+054D079B  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+43
+
+#219		 
+#220			(* Network 35 *)
+#221			LD		ME18 {R:35$0}
+(*) UNDEF
+054D07A2  33 C0                         xor eax, eax
+054D07A4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+44
+
+#222			AND		M19 {R:35$3}
+(*) BOOL
+054D07AA  33 C9                         xor ecx, ecx
+054D07AC  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+56
+054D07B2  23 C1                         and eax, ecx
+
+#223			S		ME19 {R:35$1}
+(*) BOOL
+054D07B4  84 C0                         test al, al
+054D07B6  90 74 0A 90 90 90             je 054D07C3H
+054D07BC  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; $$DATA$$+55
+
+#224			R		ME18 {R:35$2}
+(*) BOOL
+054D07C3  84 C0                         test al, al
+054D07C5  90 74 0A 90 90 90             je 054D07D2H
+054D07CB  0F 94 05 CC CC CC CC          sete [CCCCCCCCH] ; $$DATA$$+44
+
+#225		 
+#226			(* Network 36 *)
+#227			LD		ME11 {R:36$0}
+(*) UNDEF
+054D07D2  33 C0                         xor eax, eax
+054D07D4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+30
+
+#228			ST		Q0 {R:36$1}
+(*) BOOL
+054D07DA  84 C0                         test al, al
+054D07DC  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+0
+
+#229		 
+#230			(* Network 37 *)
+#231			LD		ME12 {R:37$3}
+(*) UNDEF
+054D07E3  33 C0                         xor eax, eax
+054D07E5  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+32
+
+#232			AND		ME13 {R:37$5}
+(*) BOOL
+054D07EB  33 C9                         xor ecx, ecx
+054D07ED  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+34
+054D07F3  23 C1                         and eax, ecx
+
+#233			ANDN		ME16 {R:37$6}
+(*) BOOL
+054D07F5  33 C9                         xor ecx, ecx
+054D07F7  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+40
+054D07FD  84 C9                         test cl, cl
+054D07FF  0F 94 C1                      sete cl
+054D0802  23 C1                         and eax, ecx
+
+#234			ST		Q1 {R:37$1}
+(*) BOOL
+054D0804  84 C0                         test al, al
+054D0806  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+1
+
+#235		 
+#236			(* Network 38 *)
+#237			LD		ME17 {R:38$0}
+(*) UNDEF
+054D080D  33 C0                         xor eax, eax
+054D080F  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+42
+
+#238			AND		ME18 {R:38$2}
+(*) BOOL
+054D0815  33 C9                         xor ecx, ecx
+054D0817  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+44
+054D081D  23 C1                         and eax, ecx
+
+#239			ST		Q2 {R:38$1}
+(*) BOOL
+054D081F  84 C0                         test al, al
+054D0821  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+2
+
+#240		 
+#241			(* Network 39 *)
+#242			LD		ME10 {R:39$0}
+(*) UNDEF
+054D0828  33 C0                         xor eax, eax
+054D082A  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+28
+
+#243			ST		Q3 {R:39$1}
+(*) BOOL
+054D0830  84 C0                         test al, al
+054D0832  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+3
+
+#244		 
+#245			(* Network 40 *)
+#246			LD		ME14 {R:40$0}
+(*) UNDEF
+054D0839  33 C0                         xor eax, eax
+054D083B  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+36
+
+#247			ST		Q4 {R:40$1}
+(*) BOOL
+054D0841  84 C0                         test al, al
+054D0843  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+4
+
+#248		 
+#249			(* Network 41 *)
+#250			LD		ME10 {R:41$0}
+(*) UNDEF
+054D084A  33 C0                         xor eax, eax
+054D084C  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+28
+
+#251			ST		Q5 {R:41$1}
+(*) BOOL
+054D0852  84 C0                         test al, al
+054D0854  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+5
+
+#252		 
+#253			(* Network 42 *)
+#254			LD		ME18 {R:42$0}
+(*) UNDEF
+054D085B  33 C0                         xor eax, eax
+054D085D  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+44
+
+#255			ST		Q6 {R:42$1}
+(*) BOOL
+054D0863  84 C0                         test al, al
+054D0865  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+6
+
+#256		 
+#257			(* Network 43 *)
+#258			LD		ME16 {R:43$0}
+(*) UNDEF
+054D086C  33 C0                         xor eax, eax
+054D086E  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+40
+
+#259			ST		Q7 {R:43$1}
+(*) BOOL
+054D0874  84 C0                         test al, al
+054D0876  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+7
+
+#260		 
+#261			(* Network 44 *)
+#262			LD		ME10 {R:44$0}
+(*) UNDEF
+054D087D  33 C0                         xor eax, eax
+054D087F  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+28
+
+#263			AND		ME13 {R:44$2}
+(*) BOOL
+054D0885  33 C9                         xor ecx, ecx
+054D0887  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+34
+054D088D  23 C1                         and eax, ecx
+
+#264			AND		ME17 {R:44$4}
+(*) BOOL
+054D088F  33 C9                         xor ecx, ecx
+054D0891  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+42
+054D0897  23 C1                         and eax, ecx
+
+#265			ST		Q10 {R:44$1}
+(*) BOOL
+054D0899  84 C0                         test al, al
+054D089B  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+10
+
+#266		 
+#267			(* Network 45 *)
+#268			LD		ME11 {R:45$0}
+(*) UNDEF
+054D08A2  33 C0                         xor eax, eax
+054D08A4  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+30
+
+#269			AND		ME15 {R:45$2}
+(*) BOOL
+054D08AA  33 C9                         xor ecx, ecx
+054D08AC  8A 0D CC CC CC CC             mov cl, [CCCCCCCCH] ; $$DATA$$+38
+054D08B2  23 C1                         and eax, ecx
+
+#270			ST		Q11 {R:45$1}
+(*) BOOL
+054D08B4  84 C0                         test al, al
+054D08B6  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+11
+
+#271		 
+#272			(* Network 46 *)
+#273			LD		ME19 {R:46$0}
+(*) UNDEF
+054D08BD  33 C0                         xor eax, eax
+054D08BF  8A 05 CC CC CC CC             mov al, [CCCCCCCCH] ; $$DATA$$+55
+
+#274			ST		Q12 {R:46$1}
+(*) BOOL
+054D08C5  84 C0                         test al, al
+054D08C7  0F 95 05 CC CC CC CC          setne [CCCCCCCCH] ; %Q0+12
+
+054D08CE  61                            popad
+054D08CF  5D                            pop ebp
+
+054D08D0  C3                            ret
+
+END_PROGRAM
+
+
+**************************************************
+	Target variable image generation
+**************************************************
+
+
+*** INPUT:
+054D08D1  C3                            ret
+
+
+*** OUTPUT:
+054D08D2  C3                            ret
+
+
+
+**************************************************
+	Task FAST init code
+**************************************************
+
+054D08D3  55                            push ebp
+054D08D4  8B EC                         mov ebp, esp
+
+054D08D6  8B E5                         mov esp, ebp
+054D08D8  5D                            pop ebp
+
+054D08D9  C3                            ret
+
+
+
+**************************************************
+	Global init code
+**************************************************
+
+054D08E0  55                            push ebp
+054D08E1  8B EC                         mov ebp, esp
+
+Var init: $$POUCBARRAY$$FAST = 0
+054D08E3  B9 CC CC CC CC                mov ecx, CCCCCCCCH ; $$DATA$$+84
+054D08E8  89 0D CC CC CC CC             mov [CCCCCCCCH], ecx ; $$DATA$$+60
+054D08EE  B9 CC CC CC CC                mov ecx, CCCCCCCCH ; $$DATA$$+90
+054D08F3  89 0D CC CC CC CC             mov [CCCCCCCCH], ecx ; $$DATA$$+60
+
+054D08F9  8B E5                         mov esp, ebp
+054D08FB  5D                            pop ebp
+
+054D08FC  C3                            ret
+
+
+
+**************************************************
+	Global RETAIN init code
+**************************************************
+
+054D08FD  55                            push ebp
+054D08FE  8B EC                         mov ebp, esp
+
+054D0900  8B E5                         mov esp, ebp
+054D0902  5D                            pop ebp
+
+054D0903  C3                            ret
+
+
+
+**************************************************
+	Task $$VirtualTables init code
+**************************************************
+
+054D0904  55                            push ebp
+054D0905  8B EC                         mov ebp, esp
+
+054D0907  8B E5                         mov esp, ebp
+054D0909  5D                            pop ebp
+
+054D090A  C3                            ret
+
+
+
+********************************************
+MEMORY MAP
+********************************************
+
+Code area type:			main code
+Start code area:		 54D0000h
+End code area:			 54D0910h
+Code size:			     910h
+
+Start local data area:		 5480000h
+End local data area:		 5480060h
+Local data size:		      60h
+
+Start retentive data area:	 54C0000h
+End retentive data area:	 54C0000h
+Retentive data size:		       0h
+
+Start bit data area:		       0h
+End bit data area:		       0h
+Bit data size:			       0h
+
+
+
+********************************************
+CODE ID:                                B391BA06
+DEBUG MEMO ID:                          00004B54
+FULL MEMO ID:                           000040E6
+RELOCATION ADDR:                        054D0000
+********************************************
